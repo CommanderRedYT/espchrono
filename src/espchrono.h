@@ -212,4 +212,6 @@ std::string toString(milliseconds32 val);
 std::string toString(seconds32 val);
 std::string toString(minutes32 val);
 std::string toString(hours32 val);
+
+time_t toTimeT(utc_clock::time_point ts);
 } // namespace espchrono

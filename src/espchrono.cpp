@@ -262,19 +262,28 @@ std::expected<std::chrono::seconds, std::string> parseDaypoint(std::string_view 
 
 std::string toString(const DateTime &dateTime)
 {
-    return fmt::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03}",
-                       int{dateTime.date.year()}, unsigned{dateTime.date.month()}, unsigned{dateTime.date.day()},
-                       dateTime.hour, dateTime.minute, dateTime.second, dateTime.millisecond);
+    const auto tp = fromDateTime(dateTime);
+    auto now = toTimeT(tp);
+    char buf[sizeof "1970-01-01T00:00:00Z"];
+    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+    return buf;
 }
 
 std::string toString(const LocalDateTime &dateTime)
 {
-    date::hh_mm_ss helper{dateTime.timezone.offset + hours32{dateTime.dst ? 1 : 0}};
+    auto tp = fromDateTime(dateTime);
 
-    return fmt::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03} {}{:02}:{:02}",
-                       int{dateTime.date.year()}, unsigned{dateTime.date.month()}, unsigned{dateTime.date.day()},
-                       dateTime.hour, dateTime.minute, dateTime.second, dateTime.millisecond,
-                       helper.is_negative() ? "-" : "+", uint8_t(helper.hours().count()), uint8_t(helper.minutes().count()));
+    time_t rawtime = toTimeT(tp);
+    tm* timeinfo;
+
+    timeinfo = localtime(&rawtime);
+
+    timeinfo->tm_isdst = dateTime.dst;
+    timeinfo->tm_isdst += dateTime.timezone.offset.count() / 60;
+
+    char buf[sizeof "1970-01-01T00:00:00+00:00"];
+    strftime(buf, sizeof buf, "%FT%T%z", timeinfo);
+    return buf;
 }
 
 std::string toDaypointString(std::chrono::seconds seconds)
@@ -298,4 +307,8 @@ std::string toString(seconds32 val) { return fmt::format("{}s", val.count()); }
 std::string toString(minutes32 val) { return fmt::format("{}min", val.count()); }
 std::string toString(hours32 val) { return fmt::format("{}h", val.count()); }
 
+time_t toTimeT(utc_clock::time_point ts)
+{
+    return std::chrono::duration_cast<std::chrono::seconds>(ts.time_since_epoch()).count();
+}
 } // namespace espchrono
