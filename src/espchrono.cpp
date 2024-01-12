@@ -215,6 +215,20 @@ utc_clock::time_point fromDateTime(DateTime ts)
         };
 }
 
+local_clock::time_point fromDateTime(LocalDateTime ts)
+{
+    const sys_days date = ts.date;
+    return local_clock::time_point {
+        date.time_since_epoch()
+            + std::chrono::hours{ts.hour}
+            + std::chrono::minutes{ts.minute}
+            + std::chrono::seconds{ts.second}
+            + std::chrono::milliseconds{ts.millisecond}
+            + std::chrono::microseconds{ts.microsecond}
+        , ts.timezone, ts.dst
+        };
+}
+
 std::expected<DateTime, std::string> parseDateTime(std::string_view str)
 {
     // both valid:
@@ -308,6 +322,11 @@ std::string toString(minutes32 val) { return fmt::format("{}min", val.count()); 
 std::string toString(hours32 val) { return fmt::format("{}h", val.count()); }
 
 time_t toTimeT(utc_clock::time_point ts)
+{
+    return std::chrono::duration_cast<std::chrono::seconds>(ts.time_since_epoch()).count();
+}
+
+time_t toTimeT(local_clock::time_point ts)
 {
     return std::chrono::duration_cast<std::chrono::seconds>(ts.time_since_epoch()).count();
 }

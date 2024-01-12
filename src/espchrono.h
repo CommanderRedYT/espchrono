@@ -195,6 +195,7 @@ DateTime toDateTime(std::chrono::microseconds ts);
 DateTime toDateTime(utc_clock::time_point ts);
 LocalDateTime toDateTime(local_clock::time_point ts);
 utc_clock::time_point fromDateTime(DateTime ts);
+local_clock::time_point fromDateTime(LocalDateTime ts);
 
 std::expected<DateTime, std::string> parseDateTime(std::string_view str);
 
@@ -214,4 +215,5 @@ std::string toString(minutes32 val);
 std::string toString(hours32 val);
 
 time_t toTimeT(utc_clock::time_point ts);
+time_t toTimeT(local_clock::time_point ts);
 } // namespace espchrono
