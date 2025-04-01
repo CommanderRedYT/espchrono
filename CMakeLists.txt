@@ -10,10 +10,8 @@ set(sources
 set(dependencies
     freertos
     esp_timer
-
     cpputils
     date
-    fmt
 )
 
 idf_component_register(

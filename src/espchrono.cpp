@@ -1,7 +1,7 @@
 #include "espchrono.h"
 
-// 3rdparty lib includes
-#include <fmt/format.h>
+// system includes
+#include <format>
 
 using namespace std::chrono_literals;
 using namespace date;
@@ -248,7 +248,7 @@ std::expected<DateTime, std::string> parseDateTime(std::string_view str)
 
     constexpr auto dateTimeFormat = "%4d-%2u-%2uT%2hhu:%2hhu:%2hhu.%3hu.%3hu";
     if (const auto scanned = std::sscanf(str.data(), dateTimeFormat, &year, &month, &day, &hour, &minute, &second, &millisecond, &microsecond); scanned < 5)
-        return std::unexpected(fmt::format("invalid DateTime ({})", str));
+        return std::unexpected(std::format("invalid DateTime ({})", str));
 
     return DateTime{
         .date=date::year_month_day{date::year{year}, date::month{month}, date::day{day}},
@@ -266,10 +266,10 @@ std::expected<std::chrono::seconds, std::string> parseDaypoint(std::string_view 
 
     constexpr auto daypointFormat = "%2hhd:%2hhd:%2hhd";
     if (const auto scanned = std::sscanf(str.data(), daypointFormat, &hour, &minute, &second); scanned < 2)
-        return std::unexpected(fmt::format("invalid daypoint ({})", str));
+        return std::unexpected(std::format("invalid daypoint ({})", str));
 
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59)
-        return std::unexpected(fmt::format("invalid daypoint ({})", str));
+        return std::unexpected(std::format("invalid daypoint ({})", str));
 
     return std::chrono::hours{hour} + std::chrono::minutes{minute} + std::chrono::seconds{second};
 }
@@ -304,7 +304,7 @@ std::string toDaypointString(std::chrono::seconds seconds)
 {
     date::hh_mm_ss helper(seconds);
 
-    return fmt::format("{}{:02}:{:02}:{:02}",
+    return std::format("{}{:02}:{:02}:{:02}",
                        helper.is_negative() ? "-" : "",
                        helper.hours().count(),
                        helper.minutes().count(),
@@ -316,10 +316,10 @@ std::chrono::microseconds ago(millis_clock::time_point a)
     return millis_clock::now() - a;
 }
 
-std::string toString(milliseconds32 val) { return fmt::format("{}ms", val.count()); }
-std::string toString(seconds32 val) { return fmt::format("{}s", val.count()); }
-std::string toString(minutes32 val) { return fmt::format("{}min", val.count()); }
-std::string toString(hours32 val) { return fmt::format("{}h", val.count()); }
+std::string toString(milliseconds32 val) { return std::format("{}ms", val.count()); }
+std::string toString(seconds32 val) { return std::format("{}s", val.count()); }
+std::string toString(minutes32 val) { return std::format("{}min", val.count()); }
+std::string toString(hours32 val) { return std::format("{}h", val.count()); }
 
 time_t toTimeT(utc_clock::time_point ts)
 {
